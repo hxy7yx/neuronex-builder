@@ -81,8 +81,11 @@ jobs:
       id: extract-variables
       run: |
         neuronex=$(grep -E '^[[:space:]]*neuronex[[:space:]]*:' neuronex_version | sed 's/^[[:space:]]*neuronex[[:space:]]*://;s/[[:space:]]*$//')
+        neuron_repo=$(grep -E '^[[:space:]]*neuron_repo[[:space:]]*:' neuronex_version | sed 's/^[[:space:]]*neuron_repo[[:space:]]*://;s/[[:space:]]*$//')
         echo "neuronex=$neuronex"
+        echo "neuron_repo=$neuron_repo"
         echo "neuronex=$neuronex" >> "$GITHUB_OUTPUT" 
+        echo "neuron_repo=$neuron_repo" >> "$GITHUB_OUTPUT" 
         
         mv version /tmp/version
         cat neuronex_version
@@ -103,6 +106,12 @@ jobs:
     - name: Replace version file
       run: |
         cp /tmp/version ./scripts/version
+    - name: Patch neuron URL in get_lib.sh if custom neuron_repo
+      if: ${{ steps.extract-variables.outputs.neuron_repo != 'emqx/neuron' }}
+      run: |
+        set -eux
+        sed -i '0,/neuron_url="https:\/\/github.com\/emqx\/neuron\/releases\/download\/\${neuron_version}\/neuron-\${neuron_version}-linux-\${neuron_architecture}.tar.gz"/s//neuron_url="https:\/\/github.com\/${{ steps.extract-variables.outputs.neuron_repo }}\/releases\/download\/${neuron_version}\/neuron-${neuron_version}-linux-${neuron_architecture}.tar.gz"/' ./scripts/get_lib.sh
+        cat ./scripts/get_lib.sh
     - name: Check latest image
       id: latest
       run: |
@@ -267,8 +276,11 @@ jobs:
         id: extract-variables
         run: |
           neuronex=$(grep -E '^[[:space:]]*neuronex[[:space:]]*:' neuronex_version | sed 's/^[[:space:]]*neuronex[[:space:]]*://;s/[[:space:]]*$//')
+          neuron_repo=$(grep -E '^[[:space:]]*neuron_repo[[:space:]]*:' neuronex_version | sed 's/^[[:space:]]*neuron_repo[[:space:]]*://;s/[[:space:]]*$//')
           echo "neuronex=$neuronex"
+          echo "neuron_repo=$neuron_repo"
           echo "neuronex=$neuronex" >> "$GITHUB_OUTPUT" 
+          echo "neuron_repo=$neuron_repo" >> "$GITHUB_OUTPUT" 
           
           mv version /tmp/version
           cat neuronex_version
@@ -289,6 +301,12 @@ jobs:
       - name: Replace version file
         run: |
           cp /tmp/version ./scripts/version
+      - name: Patch neuron URL in get_lib.sh if custom neuron_repo
+        if: ${{ steps.extract-variables.outputs.neuron_repo != 'emqx/neuron' }}
+        run: |
+          set -eux
+          sed -i '0,/neuron_url="https:\/\/github.com\/emqx\/neuron\/releases\/download\/\${neuron_version}\/neuron-\${neuron_version}-linux-\${neuron_architecture}.tar.gz"/s//neuron_url="https:\/\/github.com\/${{ steps.extract-variables.outputs.neuron_repo }}\/releases\/download\/${neuron_version}\/neuron-${neuron_version}-linux-${neuron_architecture}.tar.gz"/' ./scripts/get_lib.sh
+          cat ./scripts/get_lib.sh
       - uses: docker/login-action@v2
         with:
           registry: ghcr.io
