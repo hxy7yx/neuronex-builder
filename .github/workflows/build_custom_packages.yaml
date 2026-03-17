@@ -110,7 +110,8 @@ jobs:
       if: ${{ steps.extract-variables.outputs.neuron_repo != 'emqx/neuron' }}
       run: |
         set -eux
-        sed -i '0,/neuron_url="https:\/\/github.com\/emqx\/neuron\/releases\/download\/\${neuron_version}\/neuron-\${neuron_version}-linux-\${neuron_architecture}.tar.gz"/s//neuron_url="https:\/\/github.com\/${{ steps.extract-variables.outputs.neuron_repo }}\/releases\/download\/${neuron_version}\/neuron-${neuron_version}-linux-${neuron_architecture}.tar.gz"/' ./scripts/get_lib.sh
+        sed -i.bak '0,|neuron_url="https://github.com/emqx/neuron/releases/download/\${neuron_version}/neuron-\${neuron_version}-linux-\${neuron_architecture}.tar.gz"|s||neuron_url="https://github.com/${{ steps.extract-variables.outputs.neuron_repo }}/releases/download/${neuron_version}/neuron-${neuron_version}-linux-${neuron_architecture}.tar.gz"|' ./scripts/get_lib.sh
+        rm -f ./scripts/get_lib.sh.bak
         cat ./scripts/get_lib.sh
     - name: Check latest image
       id: latest
@@ -305,7 +306,8 @@ jobs:
         if: ${{ steps.extract-variables.outputs.neuron_repo != 'emqx/neuron' }}
         run: |
           set -eux
-          sed -i '0,/neuron_url="https:\/\/github.com\/emqx\/neuron\/releases\/download\/\${neuron_version}\/neuron-\${neuron_version}-linux-\${neuron_architecture}.tar.gz"/s//neuron_url="https:\/\/github.com\/${{ steps.extract-variables.outputs.neuron_repo }}\/releases\/download\/${neuron_version}\/neuron-${neuron_version}-linux-${neuron_architecture}.tar.gz"/' ./scripts/get_lib.sh
+          sed -i.bak '0,|neuron_url="https://github.com/emqx/neuron/releases/download/\${neuron_version}/neuron-\${neuron_version}-linux-\${neuron_architecture}.tar.gz"|s||neuron_url="https://github.com/${{ steps.extract-variables.outputs.neuron_repo }}/releases/download/${neuron_version}/neuron-${neuron_version}-linux-${neuron_architecture}.tar.gz"|' ./scripts/get_lib.sh
+          rm -f ./scripts/get_lib.sh.bak
           cat ./scripts/get_lib.sh
       - uses: docker/login-action@v2
         with:
